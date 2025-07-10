@@ -1,0 +1,24 @@
+node app.js
+cd backend
+node app.js
+npm install cors
+node app.js
+npm install multer
+node app.js
+cd client
+npm start
+npm install
+npm start
+npm cache clean --force
+node app.js
+npm start
+node app.js
+npm start
+clear
+node app.js
+clear
+npm start
+node app.js
+npm start
+node server.js
+npm start
