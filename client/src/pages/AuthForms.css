@@ -1,0 +1,576 @@
+body {
+    margin: 0;
+    padding: 0;
+  font-family: 'Pixelify Sans', sans-serif;
+     background-image: url("../assets/bg-pattern.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh; /* Asegura que el body tenga al menos el alto completo de la pantalla */
+  margin: 0; /* Elimina márgenes por defecto del navegador */
+}
+
+
+.form-section {
+    background-color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    max-width: 95vw;      /* Nuevo: nunca más ancho que la ventana */
+    min-width: 250px;     /* Opcional: ancho mínimo */
+    height: 50%;
+    border-radius: 20px;
+    padding: 1% 4%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box; /* Asegura que padding no sume al ancho */
+    overflow-y: auto;
+    clip-path: inset(0 round 15px);
+}
+
+.form-section.signup {
+    width: 50%;
+}
+
+.form-section.add-pokemon {
+    width: 70%;
+    height: 90%;
+    padding-top: 0;
+
+}
+
+
+
+form {
+    padding-top: 10px;
+    flex-grow: 1;
+}
+
+.form-section .redirect {
+    text-align: center;
+}
+
+.form-header-fixed {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background-color: white; /* fondo igual que el formulario */
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2px solid #ccc;
+  width: 100%;
+}
+
+.form-header-fixed h1 {
+  margin: 0;
+  font-size: 24px;
+  text-align: center;
+  font-family: 'Pixelify Sans', sans-serif;
+  border-bottom: none;
+}
+
+.corner-button {
+    display: flex;
+
+  position: absolute;
+  top: 50%;
+  padding: 6px 10px;
+  font-size: 14px;
+  font-family: 'Pixelify Sans', sans-serif;
+  border: 2px solid #E53935;
+  background-color: #FF5656;
+  border-radius: 10px;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background-color 0.2s ease;
+  color: white;
+  align-items: center;
+    transition: 0.3s;
+
+}
+
+.corner-button:hover {
+  transform: translateY(-50%) scale(1.05);
+
+}
+
+h3 {
+  padding-bottom: 10px;
+}
+.corner-button.left {
+  left: 16px;
+}
+
+.corner-button.right {
+  right: 16px;
+}
+
+.form-section > h1 {
+    text-align: center;
+    padding: 0 0 20px 0;
+    border-bottom: 1px solid silver;
+}
+
+
+
+
+.form-section.add-pokemon form {
+  display: flex;
+  flex-direction: column; 
+  gap: 5%; 
+}
+
+#map {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10%;
+  margin-bottom: 5%;
+
+}
+
+
+#information  {
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5%;
+  height: 320px;
+
+}
+
+.drop-area {
+  width: 60%;
+  height: 100%;
+  text-align: center;
+  border-radius: 28px;
+}
+
+.img-view {
+  width: 100%;
+  height: 300px;
+  border-radius: 10px;
+  border: 2px dashed #adadad;
+  background: #f7f7f7 ;
+  background-position: center;
+  background-size: cover;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  
+}
+
+.img-view img {
+  height: 150px;
+  opacity: 0.25;
+}
+
+.img-view span {
+  display: block;
+  font-size: 12px;
+  color: #777;
+}
+.drop-area:hover {
+  cursor: pointer;
+}
+
+
+/* addpokemon description */
+#description {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  gap: 5%;
+  
+}
+
+
+
+#description .form-input {
+  margin: 0;
+}
+
+
+#description .form-input input{
+  width: 50%;
+}
+
+
+#description .form-input textarea {
+  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 16px;
+  resize: none;
+    border: 2px solid #adadad;
+    background: none;
+      box-sizing: border-box; /* Incluye padding y border dentro del 100% */
+      padding: 10px;
+  outline: none;
+
+}
+
+#description .form-input.textarea {
+  height: 100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* addpokemon Caracteristicas */
+#form-char .char-input {
+  display: flex;
+}
+
+#form-char .char-input > label{
+  margin-bottom: 25px; /* Ajusta este valor según lo que necesites */
+  margin-left: 5px;
+  display: flex;              /* convierte el label en contenedor flex */
+  align-items: flex-end; 
+
+}
+
+#form-char .char-input .form-input {
+  display: flex;
+  width: 100px;
+}
+
+#characteristics {
+  width: 100%;
+  height: auto;
+}
+
+#characteristics #form-char{
+  width: 100%;
+  height: auto;
+  display: flex;
+  gap: 5%;
+}
+
+/* addpokemon Tipo */
+
+#type {
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 5px;
+}
+
+a {
+  color: #e53935;       /* Cambia este color al que desees */
+  text-decoration: none; /* Quita la subrayado */
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-size: 18px;
+  background-color: #eeeeee;
+  height: auto;
+  padding: 5px 10px;
+}
+
+.remove-tag {
+  background: none;
+  border: none;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  background-color: #e3e2e2;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 24px;
+  text-align: center;
+  padding: 0;
+  margin-left: 5px;
+}
+
+.add-tag {
+  height: auto;
+  padding: 5px 10px;
+  border-radius: 10px;
+    background-color: #eeeeee;
+    border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.form-section.add-pokemon select {
+    font-family: 'Pixelify Sans', sans-serif;
+  appearance: none;
+}
+
+/* Evolutions addpokemon */
+#evolution-line {
+  display: flex;
+  gap: 2%;
+  align-items: center;
+  margin-top: 5px;
+}
+
+
+
+.box-container {
+  position: relative;
+    display: inline-block;
+  background-color: #F7F7F7;
+  background-position: center;
+  background-size: cover;
+    font-size: 18px;
+  width: 150px;
+  height: 150px;
+    border-radius: 10px;
+
+}
+
+.box-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ajusta la imagen */
+    opacity: 0.25; /* transparencia */
+    pointer-events: none; /* evita que la imagen bloquee el clic */
+  }
+
+.add-box {
+  width: 150px;
+  height: 150px;
+  border-radius: 10px;
+    background-color: #eeeeee;
+    border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* signup login */
+#fullname {
+  display: flex;
+  gap: 5%;
+}
+
+#fullname .form-input {
+  flex: 1;
+}
+
+#register-wrapper {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  gap: 5%;
+}
+
+#register-wrapper > .column {
+  flex: 1;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(60%) sepia(10%) saturate(500%) hue-rotate(180deg);
+  cursor: pointer;
+}
+
+
+.form-input {
+  color: #adadad;
+  margin-bottom: 20px; /* Ajusta este valor según lo que necesites */
+  position: relative;
+  
+}
+
+.form-input.blank-space {
+  height: 37px;
+      padding: 0 5px;
+      width: 100%;
+          box-sizing: border-box;
+
+  border-bottom: none;
+
+
+
+}
+
+.form-input input,
+.form-input select {
+    width: 100%;
+    padding: 0 10px;
+    height: 40px;
+    font-size: 16px;
+    border: 2px solid #adadad;
+    border-radius: 10px;
+    background: none;
+    outline: none;
+    color: #adadad;
+  font-family: 'Pixelify Sans', sans-serif;
+    box-sizing: border-box;
+    
+    
+}
+
+
+
+select {
+  cursor: pointer;
+}
+
+.form-input input {
+    color: black;
+}
+
+.form-input label {
+    position: absolute;
+    top: 20px;
+    left: 10px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+    transition: .25s;
+}
+
+
+
+.form-input input:focus ~ label,
+.form-input input:valid ~ label,
+.form-input textarea:focus ~ label,
+.form-input textarea:valid ~ label {
+    top: 0;
+    color: #adadad;
+    font-size: 14px;
+    background-color: white;
+    padding: 0 5px;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
+
+
+.form-input input::focus ~ span::before {
+    width: 100%;
+}
+
+.login-signup-buttons {
+    display: block;
+    margin: 0 auto;
+    width: 200px;
+    height: 30px;
+    border: 1px solid;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #FF5656;
+    outline: none;
+    margin-top: 50px;
+    font-family: 'Pixelify Sans', sans-serif;
+
+}
+
+.login-signup-buttons:hover {
+    border-color: #FF5656;
+    transition: .5s;
+}
+
+.visibility-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    border: none;
+    cursor: pointer;
+    background: none;
+    transition: background-image 0.2s ease-in-out;
+}
+
+.visibility-icon.hide-password {
+  background-image: url("../assets/hidepassword.svg");
+} 
+
+.visibility-icon.show-password {
+  background-image: url("../assets/showpassword.svg");
+}
+
+.form-section .redirect {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+    align-self: center;
+}
+
+@media (max-width: 500px) {
+    
+}
+@media (max-height: 950px) {
+    .form-section.signup {        /* más pequeño */
+    height: 50%;      /* ajusta automáticamente la altura */
+    }
+    h1 {
+    font-size: 1.2em;
+    }
+    .login-signup-buttons {
+    margin-top: 5px;
+    }
+
+}
+
+
+@media (max-height: 800px) {
+
+.form-input select {
+    height: 25px;
+}
+
+.form-section.signup h1 {
+    padding: 0 0 10px 0;
+}
+}
+
+
+
+@media (max-height: 700px) {
+.form-section,
+  .form-section.signup {        /* más pequeño */
+    height: 60%;      /* ajusta automáticamente la altura */
+  }
+}
+
+@media (max-height: 600px) {
+  
+  .form-section.signup {        /* más pequeño */
+    height: 70%;      /* ajusta automáticamente la altura */
+  }
+}
+

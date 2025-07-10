@@ -1,0 +1,49 @@
+.view-type-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  background: #E2ECEC;
+  justify-content: space-between; /* o flex-start + gap */
+  gap: 10px; /* ajusta a lo que necesites */
+  padding: 10px 20%;
+}
+
+.view-type-btn {
+  flex: 1;
+  height: 36px;
+  border: none;
+  background: #E2ECEC;
+  color: #878585;
+  font-size: 1.25rem; /* más grande cuando está activo */
+  font-family: 'Pixelify Sans', sans-serif;
+
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, height 0.2s, font-size 0.2s;
+  outline: none;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.view-type-btn:hover {
+    background: rgb(226, 226, 226);
+  transform: scale(1.01); /* <-- Aumenta el tamaño en hover */
+
+}
+
+.view-type-btn.active {
+  background: #d2d2d2;
+  color: #cb3f41;
+  z-index: 1;
+  position: relative;
+    font-weight: bold;
+
+}
+
+.view-type-btn:first-child,
+.view-type-btn:last-child {
+  border: none;
+}

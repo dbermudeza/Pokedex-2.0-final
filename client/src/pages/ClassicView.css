@@ -1,0 +1,134 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.classic-container {
+  background-image: url('../assets/bg-pattern.png');
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  
+}
+
+.classic-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #e53935;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.pokedex-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 10px;
+  height: 70%;
+}
+
+.pokemon-list {
+  width: 760px;
+  overflow-y: scroll;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  border: 3px solid #d32f2f;
+  height: 38vh;
+  scrollbar-width: auto;
+  scrollbar-color: #d32f2f #fff;
+  color: #E75235;
+  clip-path: inset(0 round 12px);
+
+}
+
+.pokemon-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.pokemon-list::-webkit-scrollbar-thumb {
+  background-color: #d32f2f;
+  border-radius: 10px;
+}
+
+.pokemon-list::-webkit-scrollbar-track {
+  background: #fff;
+}
+
+.rotomdex-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.rotomdex-image img {
+  height: 220px;
+  image-rendering: pixelated;
+}
+
+.rotomdex-text {
+  margin-top: 10px;
+  background: white;
+  border-radius: 12px;
+  padding: 10px 14px;
+  border: 2px solid #333;
+  font-size: 18px;
+  max-width: 200px;
+  text-align: center;
+  font-family: 'Pixelify Sans', sans-serif;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.evolution-bar {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 40px;
+  margin-bottom: 25px;
+  margin-top: 235px;
+}
+
+.evolution-slot {
+  background-color: white;
+  border: 3px solid #333;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.evolution-slot.selected {
+  border: 3px solid #ff0000;
+  box-shadow: 0 0 8px #ff0000;
+}
+
+.evolution-slot:nth-child(1) {
+  width: 120px;
+  height: 120px;
+}
+
+.evolution-slot:nth-child(2) {
+  width: 140px;
+  height: 140px;
+}
+
+.evolution-slot:nth-child(3) {
+  width: 160px;
+  height: 160px;
+}
+
+.evolution-slot img {
+  height: 85%;
+  image-rendering: pixelated;
+}

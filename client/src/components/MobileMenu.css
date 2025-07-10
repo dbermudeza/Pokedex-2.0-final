@@ -1,0 +1,117 @@
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 85vw;
+  max-width: 350px;
+  height: 100vh;
+  background: #FCF5E5;
+  box-shadow: -2px 0 16px rgba(0,0,0,0.18);
+  box-shadow: inset 0 -6px 40px #F8CC96;
+  outline: 3px solid #352B2A;
+  outline-offset: -5px;
+  z-index: 9999;
+  padding: 1rem 1rem 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  animation: slideIn 0.2s;
+  border-radius: 5px;
+}
+
+@keyframes slideIn {
+  from { right: -400px; opacity: 0; }
+  to { right: 0; opacity: 1; }
+}
+
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-bottom: 1px solid #352B2A;
+  padding-bottom: 1rem;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  background: #FCF5E5;
+  padding: 3px;
+  box-sizing: border-box;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem;
+}
+
+.user-name {
+  font-weight: bold;
+}
+
+.pokedex-info {
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #352B2A;
+}
+
+.pokemon-count {
+  
+  color: #352B2A;
+}
+
+.icon-button.logout {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-menu-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem 0.8rem;
+  border: 2px solid #352B2A;
+  border-radius: 999px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.mobile-menu-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobile-menu-filters {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* No agregues estilos nuevos a .icon-button ni .icon-button img aquí,
+   así se usan los de SearchBar.css */
+
+.close-menu {
+  background: none;
+  border: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  cursor: pointer;
+  z-index: 10001;
+}
