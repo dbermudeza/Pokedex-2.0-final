@@ -12,7 +12,8 @@
   cursor: pointer;
   margin: 10px;
   position: relative;
-  height: 250px;
+  min-height: 250px;
+  height: auto;
 }
 
 .pokemon-card-regular:hover {
@@ -51,12 +52,20 @@
   font-weight: bold;
   color: #fff;
   border-radius: 10px;
-  padding: 6px 0;
+  padding: 6px 8px;
   width: 100%;
   margin-bottom: 8px;
   text-transform: capitalize;
   text-align: center;
   letter-spacing: 1px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.2;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pokemon-card-regular .poke-types {

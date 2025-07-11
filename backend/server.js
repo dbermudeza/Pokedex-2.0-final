@@ -33,6 +33,10 @@ app.post('/api/pokemon', upload.fields([
 ]), pokemonController.createPokemons
 );
 
+// Endpoints para favoritos
+app.post('/api/favorites/toggle', pokemonController.toggleFavorite);
+app.get('/api/favorites/:userId', pokemonController.getFavorites);
+
 app.post('/api/register', authController.register); 
 app.post('/api/login', authController.login);  
 

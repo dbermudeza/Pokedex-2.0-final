@@ -59,6 +59,7 @@ const ClassicView = () => {
   const typesFromQuery = params.get("types") ? params.get("types").split(",") : [];
   const sortType = params.get("sort") || "id-asc";
   const searchValue = params.get("search") || "";
+  const showFavoritesOnly = params.get("favorites") === "true";
   const [selectedTypes, setSelectedTypes] = useState(typesFromQuery);
   
   useEffect(() => {
@@ -68,7 +69,8 @@ const ClassicView = () => {
   const filteredPokemons = allPokemons.filter(p => {
     const matchesType = typesFromQuery.length === 0 || (p.type && p.type.some(type => typesFromQuery.includes(type)));
     const matchesSearch = !searchValue || (p.nombre && p.nombre.toLowerCase().includes(searchValue.toLowerCase()));
-    return matchesType && matchesSearch;
+    const matchesFavorites = !showFavoritesOnly || (p.favorito === 1 || p.favorito === true);
+    return matchesType && matchesSearch && matchesFavorites;
   });
 
   const sortedPokemons = [...filteredPokemons].sort((a, b) => {
@@ -94,12 +96,14 @@ const ClassicView = () => {
         types: selectedTypes.join(','),
         sort: sortType,
         search: searchValue,
+        favorites: showFavoritesOnly ? 'true' : '',
         ...newParams
     };
     const params = new URLSearchParams();
     if (currentParams.types) params.append('types', currentParams.types);
     if (currentParams.sort) params.append('sort', currentParams.sort);
     if (currentParams.search) params.append('search', currentParams.search);
+    if (currentParams.favorites) params.append('favorites', currentParams.favorites);
     return params.toString() ? `?${params.toString()}` : '';
   }
 
@@ -115,6 +119,10 @@ const ClassicView = () => {
 
   const handleSearch = (value) => {
     navigate(`/clasica${buildQueryString({ search: value })}`);
+  };
+
+  const handleFavoritesClick = () => {
+    navigate('/clasica?favorites=true');
   };
 
   // Lógica específica de la vista
@@ -136,7 +144,11 @@ const ClassicView = () => {
       <Header
         onMenuClick={() => setMobileMenuOpen(true)}
         onLogoutClick={handleLogout}
+        isLoggedIn={isLoggedIn}
+        onFavoritesClick={handleFavoritesClick}
+        username={currentUser?.nombre}
         pokedexCount={currentUser ? allPokemons.filter(p => p.id_usuario === currentUser.id).length : 0}
+        onFilter={() => setShowTypeFilter(true)}
       />
       <SearchBar
         onFilter={() => setShowTypeFilter(true)}
@@ -146,11 +158,14 @@ const ClassicView = () => {
       <ViewTypeBar viewType={viewType} onChange={(type) => navigate(`/${type}`)} />
       {mobileMenuOpen && (
         <MobileMenu
+          isLoggedIn={isLoggedIn}
+          userName={currentUser?.nombre}
           pokedexCount={currentUser ? allPokemons.filter(p => p.id_usuario === currentUser.id).length : 0}
           onLogout={handleLogout}
           onSearch={handleSearch}
           onFilter={() => setShowTypeFilter(true)}
           onSort={() => setShowSortModal(true)}
+          onFavoritesClick={handleFavoritesClick}
           onClose={() => setMobileMenuOpen(false)}
         />
       )}

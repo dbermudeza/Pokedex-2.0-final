@@ -55,18 +55,20 @@ const insertPokemonTransaction = db.transaction((pokemonData) => {
 exports.getPokemons = (req, res) => {
     const { userId } = req.query;
 
-    // 1. LA CONSULTA SQL AHORA UNE LAS 3 TABLAS
-    // GROUP_CONCAT une todos los nombres de los tipos en un solo string separado por comas.
+    // Consulta SQL que incluye información de favoritos
     const baseQuery = `
         SELECT 
             p.*, 
-            GROUP_CONCAT(t.nombre) AS tipos
+            GROUP_CONCAT(t.nombre) AS tipos,
+            CASE WHEN f.id_usuario IS NOT NULL THEN 1 ELSE 0 END AS favorito
         FROM 
             pokemon p
         LEFT JOIN 
             pokemon_tipo pt ON p.id = pt.id_pokemon
         LEFT JOIN 
             tipo t ON pt.id_tipo = t.id
+        LEFT JOIN 
+            favorito f ON p.id = f.id_pokemon AND f.id_usuario = ?
     `;
 
     let sql;
@@ -75,9 +77,10 @@ exports.getPokemons = (req, res) => {
     // La lógica para filtrar por usuario sigue siendo la misma
     if (userId) {
         sql = `${baseQuery} WHERE p.id_usuario IS NULL OR p.id_usuario = ? GROUP BY p.id`;
-        params.push(userId);
+        params.push(userId, userId);
     } else {
         sql = `${baseQuery} WHERE p.id_usuario IS NULL GROUP BY p.id`;
+        params.push(null);
     }
 
     try {
@@ -85,7 +88,8 @@ exports.getPokemons = (req, res) => {
         const pokemonesConTiposEnArray = pokemones.map(p => {
             return {
                 ...p,
-                type: p.tipos ? p.tipos.split(',') : [] 
+                type: p.tipos ? p.tipos.split(',') : [],
+                favorito: !!p.favorito
             };
         });
         res.json(pokemonesConTiposEnArray);
@@ -111,5 +115,48 @@ exports.createPokemons = (req, res) => {
         res.status(201).json({ id: result.id, message: "Pokémon añadido con éxito" });
     } catch (err) {
         res.status(400).json({ "error": err.message });
+    }
+};
+
+// Endpoint para agregar/quitar favorito
+exports.toggleFavorite = (req, res) => {
+    const { userId, pokemonId } = req.body;
+
+    if (!userId || !pokemonId) {
+        return res.status(400).json({ error: 'userId y pokemonId son requeridos' });
+    }
+
+    try {
+        // Verificar si ya existe el favorito
+        const existingFavorite = db.prepare('SELECT * FROM favorito WHERE id_usuario = ? AND id_pokemon = ?').get(userId, pokemonId);
+
+        if (existingFavorite) {
+            // Si existe, lo elimina
+            db.prepare('DELETE FROM favorito WHERE id_usuario = ? AND id_pokemon = ?').run(userId, pokemonId);
+            res.json({ isFavorite: false, message: 'Removido de favoritos' });
+        } else {
+            // Si no existe, lo agrega
+            db.prepare('INSERT INTO favorito (id_usuario, id_pokemon) VALUES (?, ?)').run(userId, pokemonId);
+            res.json({ isFavorite: true, message: 'Agregado a favoritos' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Error en el servidor: ' + err.message });
+    }
+};
+
+// Endpoint para obtener favoritos de un usuario
+exports.getFavorites = (req, res) => {
+    const { userId } = req.params;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'userId es requerido' });
+    }
+
+    try {
+        const favorites = db.prepare('SELECT id_pokemon FROM favorito WHERE id_usuario = ?').all(userId);
+        const favoriteIds = favorites.map(fav => fav.id_pokemon);
+        res.json({ favorites: favoriteIds });
+    } catch (err) {
+        res.status(500).json({ error: 'Error en el servidor: ' + err.message });
     }
 };

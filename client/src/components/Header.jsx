@@ -12,7 +12,8 @@ import { useAuth } from '../context/AuthContext'; // Asegúrate que la ruta es c
 const Header = ({
   onMenuClick,
   onLogoutClick,
-  pokedexCount = 0 // Se añade un valor por defecto para seguridad
+  pokedexCount = 0, // Se añade un valor por defecto para seguridad
+  onFavoritesClick // Nueva prop para manejar el click en favoritos
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,6 +26,20 @@ const Header = ({
       navigate('/general');
     } else if (path.startsWith('/clasica')) {
       navigate('/clasica');
+    }
+  };
+
+  const handleFavoritesClick = () => {
+    if (onFavoritesClick) {
+      onFavoritesClick();
+    } else {
+      // Comportamiento por defecto: navegar a la vista general con filtro de favoritos
+      const currentPath = location.pathname;
+      if (currentPath.startsWith('/general')) {
+        navigate('/general?favorites=true');
+      } else if (currentPath.startsWith('/clasica')) {
+        navigate('/clasica?favorites=true');
+      }
     }
   };
 
@@ -53,6 +68,7 @@ const Header = ({
             <button
               className="header-button"
               title="Favoritos"
+              onClick={handleFavoritesClick}
             >
               <FavoriteIcon className="favourite-icon" />
               <span>Favoritos</span>

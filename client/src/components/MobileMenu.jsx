@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import './MobileMenu.css';
 import profileIcon from '../assets/PROFILEICON.png';
 import LogoutIcon from '@mui/icons-material/Logout';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import filterRombo from '../assets/filter-rombo.png';
 import sortRombo from '../assets/sort-rombo.png';
 import CloseIcon from '@mui/icons-material/Close';
 import { useAuth } from '../context/AuthContext'; // <-- 1. IMPORTA useAuth
-import { useNavigate } from 'react-router-dom'; // <-- 2. IMPORTA useNavigate
+import { useNavigate, useLocation } from 'react-router-dom'; // <-- 2. IMPORTA useNavigate y useLocation
 
 const MobileMenu = ({
   // Se quitan isLoggedIn y userName de las props
@@ -16,9 +17,11 @@ const MobileMenu = ({
   onFilter = () => {},
   onSort = () => {},
   onClose = () => {},
+  onFavoritesClick = () => {} // Nueva prop
 }) => {
   const [input, setInput] = useState("");
   const navigate = useNavigate(); // Hook para navegar
+  const location = useLocation(); // Hook para obtener la ubicación actual
   const { isLoggedIn, username } = useAuth(); // <-- 3. USA EL CONTEXTO
 
   const handleInput = (e) => setInput(e.target.value);
@@ -34,7 +37,22 @@ const MobileMenu = ({
   const handleLogin = () => {
     onClose(); // Cierra el menú
     navigate('/login'); // Navega a la página de login
-  }
+  };
+
+  const handleFavoritesClick = () => {
+    onClose(); // Cierra el menú
+    if (onFavoritesClick && typeof onFavoritesClick === 'function') {
+      onFavoritesClick();
+    } else {
+      // Comportamiento por defecto
+      const currentPath = location.pathname;
+      if (currentPath.startsWith('/general')) {
+        navigate('/general?favorites=true');
+      } else if (currentPath.startsWith('/clasica')) {
+        navigate('/clasica?favorites=true');
+      }
+    }
+  };
 
   return (
     <div className="mobile-menu">
@@ -111,6 +129,11 @@ const MobileMenu = ({
         />
       </div>
       <div className="mobile-menu-filters">
+        {isLoggedIn && (
+          <button className="icon-button" onClick={handleFavoritesClick} title="Favoritos">
+            <FavoriteIcon style={{ color: '#cb3f41', fontSize: 24 }} />
+          </button>
+        )}
         <button className="icon-button" onClick={onFilter}>
           <img src={filterRombo} alt="Filtro" />
         </button>

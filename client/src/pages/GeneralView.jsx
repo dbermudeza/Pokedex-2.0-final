@@ -62,6 +62,7 @@ const GeneralView = () => {
   const typesFromQuery = params.get("types") ? params.get("types").split(",") : [];
   const sortType = params.get("sort") || "id-asc";
   const searchValue = params.get("search") || "";
+  const showFavoritesOnly = params.get("favorites") === "true";
   const [selectedTypes, setSelectedTypes] = useState(typesFromQuery);
 
   console.log("2. Estado `allPokemons`:", allPokemons); // <-- PUNTO DE CONTROL 2
@@ -69,7 +70,8 @@ const GeneralView = () => {
   const filteredPokemons = allPokemons.filter(p => {
     const matchesType = typesFromQuery.length === 0 || (p.type && p.type.some(type => typesFromQuery.includes(type)));
     const matchesSearch = !searchValue || (p.nombre && p.nombre.toLowerCase().includes(searchValue.toLowerCase()));
-    return matchesType && matchesSearch;
+    const matchesFavorites = !showFavoritesOnly || p.favorito;
+    return matchesType && matchesSearch && matchesFavorites;
   });
 
   console.log("3. Pokémones después de filtrar:", filteredPokemons); // <-- PUNTO DE CONTROL 3
@@ -112,12 +114,14 @@ const GeneralView = () => {
         types: selectedTypes.join(','),
         sort: sortType,
         search: searchValue,
+        favorites: showFavoritesOnly ? 'true' : undefined,
         ...newParams
     };
     const params = new URLSearchParams();
     if (currentParams.types) params.append('types', currentParams.types);
     if (currentParams.sort) params.append('sort', currentParams.sort);
     if (currentParams.search) params.append('search', currentParams.search);
+    if (currentParams.favorites) params.append('favorites', currentParams.favorites);
     return params.toString() ? `?${params.toString()}` : '';
   }
 
@@ -135,11 +139,16 @@ const GeneralView = () => {
     navigate(`/general${buildQueryString({ search: value })}`);
   };
 
+  const handleFavoritesToggle = () => {
+    navigate(`/general${buildQueryString({ favorites: !showFavoritesOnly ? 'true' : undefined })}`);
+  };
+
   return (
     <div className="regular-view-container">
       <Header
         onMenuClick={() => setMobileMenuOpen(true)}
         onLogoutClick={handleLogout}
+        onFavoritesClick={handleFavoritesToggle}
         pokedexCount={currentUser ? allPokemons.filter(p => p.id_usuario === currentUser.id).length : 0}
       />
       <SearchBar
@@ -155,6 +164,7 @@ const GeneralView = () => {
           onSearch={handleSearch}
           onFilter={() => setShowTypeFilter(true)}
           onSort={() => setShowSortModal(true)}
+          onFavoritesClick={handleFavoritesToggle}
           onClose={() => setMobileMenuOpen(false)}
         />
       )}
