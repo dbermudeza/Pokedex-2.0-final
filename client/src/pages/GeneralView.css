@@ -42,13 +42,14 @@ body {
 
 .regular-view-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, 220px);
   gap: 28px 32px;
   width: 95vw;
   max-width: 1300px;
   margin: 0 auto;
   padding: 0 10px 40px 10px;
   box-sizing: border-box;
+  justify-content: start;
 }
 
 .arrow-btn {

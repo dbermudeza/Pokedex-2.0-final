@@ -52,7 +52,7 @@
   font-weight: bold;
   color: #fff;
   border-radius: 10px;
-  padding: 6px 8px;
+  padding: 6px 0.4px;
   width: 100%;
   margin-bottom: 8px;
   text-transform: capitalize;
@@ -66,6 +66,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .pokemon-card-regular .poke-types {
