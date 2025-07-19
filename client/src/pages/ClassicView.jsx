@@ -122,7 +122,7 @@ const ClassicView = () => {
   };
 
   const handleFavoritesClick = () => {
-    navigate('/clasica?favorites=true');
+    navigate(`/clasica${buildQueryString({ favorites: !showFavoritesOnly ? 'true' : undefined })}`);
   };
 
   // Lógica específica de la vista
