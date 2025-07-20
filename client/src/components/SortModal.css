@@ -6,7 +6,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Pixelify Sans', sans-serif;
 }
+
 .sort-modal-content {
   background: #fff;
   border-radius: 16px;
@@ -16,12 +18,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-family: 'Pixelify Sans', sans-serif;
 }
 .sort-modal-title {
   color: #0D84EF;
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 18px;
+  
 }
 .sort-modal-options {
   display: flex;
@@ -31,8 +35,8 @@
   margin-bottom: 18px;
 }
 .sort-modal-btn {
-  background: #0D84EF;
-  color: #fff;
+  background: #F3F3F3;
+  color: #5A5A5A;
   border: none;
   border-radius: 7px;
   padding: 8px 18px;
@@ -44,13 +48,15 @@
   transition: background 0.2s;
   width: 100%;
   justify-content: flex-start;
+  font-family: 'Pixelify Sans', sans-serif;
 }
-.sort-modal-btn.selected,
-.sort-modal-btn:hover {
-  background: #cb3f41;
+.sort-modal-btn.selected {
+  background: #D2D2D2;
+  color: #CB3F41;
+  
 }
 .sort-modal-cancel {
-  background: #cb3f41;
+  background: #FF5656;
   color: #fff;
   border: none;
   border-radius: 7px;
@@ -62,5 +68,10 @@
   transition: background 0.2s;
 }
 .sort-modal-cancel:hover {
-  background: #a82d2f;
+  background: #FF5656;
+  transform: scale(1.01); /* <-- Aumenta el tamaño en hover */
+}
+.sort-modal-btn:hover {
+  transform: scale(1.05); /* <-- Aumenta el tamaño en hover */
+
 }

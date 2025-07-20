@@ -39,6 +39,7 @@ body {
     width: 70%;
     height: 90%;
     padding-top: 0;
+    
 
 }
 
@@ -372,6 +373,7 @@ a {
     border: none;
   font-size: 18px;
   cursor: pointer;
+  overflow: hidden; /* Para que no se desborde */
 }
 
 /* signup login */

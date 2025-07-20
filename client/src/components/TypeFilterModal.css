@@ -10,26 +10,33 @@
 .type-filter-modal-content {
   background: #fff;
   border-radius: 18px;
-  padding: 32px 24px 24px 24px;
+  padding: 24px;
   min-width: 320px;
+  max-height: 80vh; /* Altura máxima relativa a la ventana */
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+  overflow: hidden; /* Esconde el overflow del contenedor principal */
 }
 .type-filter-title {
-  margin-bottom: 18px;
+  margin-bottom: 12px;
+  text-align: center;
   color: #0D84EF;
   font-size: 1.3rem;
   font-weight: bold;
+  flex-shrink: 0;
 }
 .type-filter-list {
+  flex: 1;
+  overflow-y: auto;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
   margin-bottom: 20px;
-  justify-content: center;
+  padding-right: 6px; /* para que el scroll no se monte encima */
 }
+
 .type-filter-item {
   background: #f3f3f3;
   border-radius: 8px;
@@ -52,6 +59,11 @@
 .type-filter-actions {
   display: flex;
   gap: 12px;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: auto; /* empuja los botones al fondo */
+  padding-top: 10px;
+  border-top: 1px solid #eee;
 }
 .type-filter-btn {
   background: #0D84EF;
@@ -64,9 +76,14 @@
   font-weight: bold;
   transition: background 0.2s;
 }
-.type-filter-btn.cancel {
-  background: #cb3f41;
+.type-filter-btn {
+  border: 2px solid #E53935;
+  background-color: #FF5656;
+  font-family: 'Pixelify Sans', sans-serif;
 }
 .type-filter-btn:hover {
   opacity: 0.92;
+  
+  transform: scale(1.05);
+
 }

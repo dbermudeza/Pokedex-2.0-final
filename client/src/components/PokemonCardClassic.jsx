@@ -1,15 +1,16 @@
-import React from 'react';
+import React, {useState } from 'react';
 import './PokemonCardClassic.css';
 
-const PokemonCardClassic = ({ pokemon }) => {
+const PokemonCardClassic = ({ pokemon, className = ''}) => {
   // Construimos la URL completa para la imagen del backend
   const imageUrl = pokemon.ruta_imagen 
     ? `http://localhost:5000/${pokemon.ruta_imagen}` 
     : "/assets/pokeball.png";
 
+  const [highlightedId, setHighlightedId] = useState(null); 
   return (
     // Se elimina la dependencia de 'discovered'
-    <div className={`pokemon-card`}>
+    <div className={`pokemon-card ${className}`}>
       <div className="card-left">
         {/* Usamos 'id' que sí existe */}
         <span className="poke-id">#{pokemon.id.toString().padStart(3, '0')}</span>

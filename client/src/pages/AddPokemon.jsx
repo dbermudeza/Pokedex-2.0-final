@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import pinIcon from '../assets/pin.png';
 import evolutionIcon from '../assets/evolution.png';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
+import PokemonCardClassic from '../components/PokemonCardClassic';
 import './AuthForms.css';
+import './AddPokemon.css';
 
 
 
@@ -16,6 +19,15 @@ const AddPokemon = () => {
   const [habilidad, setHabilidad] = useState('');
   const [genero, setGenero] = useState('');
   const [tiposSeleccionados, setTiposSeleccionados] = useState([]);
+  const [pokemonesUsuario, setPokemonesUsuario] = useState([]);
+  const [showEvolutionModal, setShowEvolutionModal] = useState(false);
+  const [showInvolutionModal, setShowInvolutionModal] = useState(false);
+  const [evolutionSeleccionada,   setEvolutionSeleccionada]   = useState(null);
+  const [involutionSeleccionada,  setInvolutionSeleccionada]  = useState(null);
+  const [highlightedId, setHighlightedId] = useState(null);
+
+
+
 
   const inputRef1 = useRef(null);
   const imageViewRef1 = useRef(null);
@@ -30,17 +42,29 @@ const AddPokemon = () => {
   ];
 
   const agregarTipo = (e) => {
-    const nuevoTipo = e.target.value;
-    if (nuevoTipo && !tiposSeleccionados.includes(nuevoTipo)) {
-      setTiposSeleccionados([...tiposSeleccionados, nuevoTipo]);
-    }
-    e.target.value = ""; // reset select
+  const nuevoTipo = e.target.value;
+  if (nuevoTipo && !tiposSeleccionados.includes(nuevoTipo)) {
+    setTiposSeleccionados([...tiposSeleccionados, nuevoTipo]);
+  }
+  e.target.value = ""; // resetear selección
   };
+
 
   const eliminarTipo = (tipo) => {
     setTiposSeleccionados(tiposSeleccionados.filter(t => t !== tipo));
   };
 
+const { isLoggedIn } = useAuth();
+  const [idUsuario, setIdUsuario] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+
+    if (isLoggedIn && storedUser) {
+      const user = JSON.parse(storedUser);
+      setIdUsuario(user.id);
+    }
+  }, [isLoggedIn]);
 
 
   useEffect(() => {
@@ -48,22 +72,27 @@ const AddPokemon = () => {
       const input = inputRef.current;
       const imageView = imageViewRef.current;
 
+      if (!input || !imageView) return;
+      
       const handleChange = () => {
-        const file = input.files[0];
-        if (file) {
-          const imgLink = URL.createObjectURL(file);
+      const file = input.files[0];
+      if (file && imageView) {
+        const imgLink = URL.createObjectURL(file);
+
+        if (imageView) {
           imageView.style.backgroundImage = `url(${imgLink})`;
           imageView.textContent = '';
           imageView.style.border = 'none';
-
-          if (optionalEvolutionRef) {
-            const evolution = optionalEvolutionRef.current;
-            evolution.style.backgroundImage = `url(${imgLink})`;
-            evolution.textContent = '';
-            evolution.style.border = 'none';
-          }
         }
-      };
+
+        if (optionalEvolutionRef && optionalEvolutionRef.current) {
+          const evolution = optionalEvolutionRef.current;
+          evolution.style.backgroundImage = `url(${imgLink})`;
+          evolution.textContent = '';
+          evolution.style.border = 'none';
+        }
+      }
+    };
 
       const handleDrop = (e) => {
         e.preventDefault();
@@ -91,7 +120,34 @@ const AddPokemon = () => {
       cleanup1();
       cleanup2();
     };
+
+    
   }, []);
+
+  useEffect(() => {
+    
+  if (showEvolutionModal && idUsuario) {
+    fetch(`http://localhost:5000/api/usuarios/${idUsuario}/pokemones/no-evolution`)      .then(res => res.json())
+      .then(data => {
+        setPokemonesUsuario(data);
+      })
+      .catch(err => console.error("Error al cargar Pokémon:", err));
+  }
+}, [showEvolutionModal, idUsuario]);
+
+useEffect(() => {
+    
+  if (showInvolutionModal && idUsuario) {
+    fetch(`http://localhost:5000/api/usuarios/${idUsuario}/pokemones/no-involution`)      .then(res => res.json())
+      .then(data => {
+        setPokemonesUsuario(data);
+      })
+      .catch(err => console.error("Error al cargar Pokémon:", err));
+  }
+}, [showInvolutionModal, idUsuario]);
+
+
+
 
   const navigate = useNavigate();
   
@@ -123,6 +179,9 @@ const AddPokemon = () => {
     formData.append('genero', genero);
     formData.append('tipos', JSON.stringify(tiposSeleccionados)); // Enviamos el array como un string JSON
     formData.append('userId', userId);
+    if (evolutionSeleccionada) formData.append('id_pokemon_evolucion', evolutionSeleccionada.id);
+    if (involutionSeleccionada) formData.append('id_pokemon_involucion', involutionSeleccionada.id);
+
 
     // Añade los archivos
     formData.append('pokemonImage', inputRef1.current.files[0]);
@@ -142,7 +201,6 @@ const AddPokemon = () => {
         throw new Error(result.error || 'Error al añadir el Pokémon');
       }
 
-      console.log('Pokémon añadido:', result);
       alert('¡Pokémon añadido con éxito!');
       navigate(-1);
       
@@ -153,7 +211,85 @@ const AddPokemon = () => {
   };
 
   return (
-    <div className="form-section add-pokemon">
+    
+    <>
+      {showEvolutionModal && (
+  <div className="modal-overlay" onClick={() => setShowEvolutionModal(false)}>
+    <div className="modal-content" onClick={e => e.stopPropagation()}>
+      <h2>Elegir evolución</h2>
+      <div className="evo-list">
+        {pokemonesUsuario.length === 0
+          ? <p>No tienes Pokémon disponibles.</p>
+          : pokemonesUsuario.map(p => (
+              <button
+                key={p.id}
+                className="evo-card-btn"
+                onClick={() => {
+                  console.log("Evolución seleccionada:", p);
+                  setEvolutionSeleccionada({ 
+                    id: p.id, 
+                    imagen: `http://localhost:5000/${p.ruta_imagen.replace(/\\/g, '/')}`
+                  });
+                  setHighlightedId(p.id);
+                  setShowEvolutionModal(false);
+                }}
+              >
+                <PokemonCardClassic 
+                  pokemon={p} 
+                  className={p.id === highlightedId ? 'selected' : ''} // ← pasas la clase
+                />
+                
+              </button>
+            ))
+        }
+      </div>
+      <button className="close-btn" onClick={() => setShowEvolutionModal(false)}>
+        Cerrar
+      </button>
+    </div>
+  </div>
+)}
+
+{/* Modal Involución */}
+{showInvolutionModal && (
+  <div className="modal-overlay" onClick={() => setShowInvolutionModal(false)}>
+    <div className="modal-content" onClick={e => e.stopPropagation()}>
+      <h2>Elegir involución</h2>
+      <div className="evo-list">
+        {pokemonesUsuario.length === 0
+          ? <p>No tienes Pokémon disponibles.</p>
+          : pokemonesUsuario.map(p => (
+              <button
+                key={p.id}
+                className="evo-card-btn"
+                onClick={() => {
+                  console.log("Evolución seleccionada:", p);
+                  setInvolutionSeleccionada({ 
+                    id: p.id, 
+                    imagen: `http://localhost:5000/${p.ruta_imagen.replace(/\\/g, '/')}`
+                  });
+                  setHighlightedId(p.id);
+                  setShowInvolutionModal(false);
+                }}
+
+              >
+                <PokemonCardClassic 
+                  pokemon={p} 
+                  className={p.id === highlightedId ? 'selected' : ''} // ← pasas la clase
+                />
+              </button>
+            ))
+        }
+      </div>
+      <button className="close-btn" onClick={() => setShowInvolutionModal(false)}>
+        Cerrar
+      </button>
+    </div>
+  </div>
+)}
+
+      <div className="form-section add-pokemon">
+      
       <div className="form-header-fixed">
         <button className="corner-button left" onClick={() => window.history.back()}>
           ⬅ Volver
@@ -307,31 +443,64 @@ const AddPokemon = () => {
         </div>
 
         <div id="type">
-          <h3>Tipo*</h3>
-          <div className="tags">
-            {tiposSeleccionados.map((tipo, idx) => (
-              <span key={idx} className="tag">
-                {tipo} <button type="button" className="remove-tag" onClick={() => eliminarTipo(tipo)}>&times;</button>
-              </span>
-            ))} 
+        <h3>Tipo*</h3>
+        <div className="tags">
+          {tiposSeleccionados.map((tipo, idx) => (
+            <span key={idx} className="tag">
+              {tipo}
+              <button
+                type="button"
+                className="remove-tag"
+                onClick={() => eliminarTipo(tipo)}
+              >
+                &times;
+              </button>
+            </span>
+          ))}
+
+          {/* Mostrar el select solo si hay menos de 2 tipos */}
+          {tiposSeleccionados.length < 2 && (
             <select className="add-tag" onChange={agregarTipo}>
               <option value="">+ Añadir tipo</option>
               {tiposDisponibles.map((tipo, idx) => (
-                <option key={idx} value={tipo}>{tipo}</option>
+                <option key={idx} value={tipo}>
+                  {tipo}
+                </option>
               ))}
             </select>
-          </div>
+          )}
         </div>
+      </div>
+
 
         <div id="evolutions">
           <h3>Evoluciones</h3>
           <div id="evolution-line">
-            <button type="button" className="add-box">+</button>
+            <button 
+              type="button" 
+              className="add-box involution" 
+              onClick={() => setShowInvolutionModal(true)}
+            >
+              {involutionSeleccionada ? (
+                <img src={involutionSeleccionada.imagen} alt="Involución" />
+              ) : '+'}
+            </button>
+
             <div className="box-container" ref={imageEvolutionRef}>
               <img src={evolutionIcon} alt="fondo superpuesto" />
             </div>
-            <button type="button" className="add-box">+</button>
+
+            <button 
+              type="button" 
+              className="add-box evolution" 
+              onClick={() => setShowEvolutionModal(true)}
+            >
+              {evolutionSeleccionada ? (
+                <img src={evolutionSeleccionada.imagen} alt="Evolución" />
+              ) : '+'}
+            </button>
           </div>
+
         </div>
 
         <div id="location">
@@ -349,6 +518,8 @@ const AddPokemon = () => {
         </div>
       </form>
     </div>
+    </>
+    
   );
 };
 

@@ -1,13 +1,15 @@
 const db = require('../models/db');
 
 const insertPokemonTransaction = db.transaction((pokemonData) => {
-    const { 
-        nombre, descripcion, altura, peso, categoria, habilidad, genero, 
-        tipos, userId, pokemonImagePath, locationImagePath 
-    } = pokemonData;
+    console.log("📦 Datos recibidos para insertar Pokémon:", pokemonData);
+  const { 
+    nombre, descripcion, altura, peso, categoria, habilidad, genero, 
+    tipos, userId, pokemonImagePath, locationImagePath,
+    id_pokemon_evolucion = null,   // Valor por defecto
+    id_pokemon_involucion = null   // Valor por defecto
+  } = pokemonData;
 
-    // 1. Convertir el valor del género a 'M' o 'F'
-    let generoParaDB;
+  let generoParaDB;
     if (genero && genero.toLowerCase() === 'masculino') {
         generoParaDB = 'M';
     } else if (genero && genero.toLowerCase() === 'femenino') {
@@ -16,27 +18,54 @@ const insertPokemonTransaction = db.transaction((pokemonData) => {
         generoParaDB = null; // Asignar NULL si no es ninguno
     }
 
-    // 2. Insertar los datos principales en la tabla 'pokemon'
-    const pokemonSql = `INSERT INTO pokemon (nombre, descripcion, altura, peso, categoria, habilidad, genero, ruta_imagen, ruta_ubicacion, id_usuario)
-                        VALUES (@nombre, @descripcion, @altura, @peso, @categoria, @habilidad, @genero, @ruta_imagen, @ruta_ubicacion, @id_usuario)`;
-    
-    const pokemonStmt = db.prepare(pokemonSql);
-    const info = pokemonStmt.run({
-        nombre,
-        descripcion,
-        altura,
-        peso,
-        categoria,
-        habilidad,
-        genero: generoParaDB, // Se usa la variable convertida
-        ruta_imagen: pokemonImagePath,
-        ruta_ubicacion: locationImagePath,
-        id_usuario: userId
-    });
 
-    const newPokemonId = info.lastInsertRowid;
+  const sql = `
+    INSERT INTO pokemon (
+      nombre, descripcion, altura, peso, categoria, habilidad, genero,
+      ruta_imagen, ruta_ubicacion,
+      id_pokemon_evolucion, id_pokemon_involucion, id_usuario
+    ) VALUES (
+      @nombre, @descripcion, @altura, @peso, @categoria, @habilidad, @genero,
+      @ruta_imagen, @ruta_ubicacion,
+      @id_pokemon_evolucion, @id_pokemon_involucion, @id_usuario
+    )
+  `;
+  const stmt = db.prepare(sql);
+  const info = stmt.run({
+    nombre,
+    descripcion,
+    altura,
+    peso,
+    categoria,
+    habilidad,
+    genero: generoParaDB,
+    ruta_imagen: pokemonImagePath,
+    ruta_ubicacion: locationImagePath,
+    id_pokemon_evolucion,    // puede ser null
+    id_pokemon_involucion,   // puede ser null
+    id_usuario: userId
+  });
 
-    // 3. Insertar las relaciones en la tabla 'pokemon_tipo'
+  const newPokemonId = info.lastInsertRowid;
+
+  if (id_pokemon_involucion) {
+    db.prepare(`
+      UPDATE pokemon
+      SET id_pokemon_evolucion = ?
+      WHERE id = ?
+    `).run(newPokemonId, id_pokemon_involucion);
+  }
+
+  // 3) Si el usuario eligió una evolución, actualiza el Pokémon hijo
+  if (id_pokemon_evolucion) {
+    db.prepare(`
+      UPDATE pokemon
+      SET id_pokemon_involucion = ?
+      WHERE id = ?
+    `).run(newPokemonId, id_pokemon_evolucion);
+  }
+
+  // 3. Insertar las relaciones en la tabla 'pokemon_tipo'
     if (tipos && tipos.length > 0) {
         const selectTypeStmt = db.prepare('SELECT id FROM tipo WHERE nombre = ?');
         const insertPokemonTypeStmt = db.prepare('INSERT INTO pokemon_tipo (id_pokemon, id_tipo) VALUES (?, ?)');
@@ -50,7 +79,71 @@ const insertPokemonTransaction = db.transaction((pokemonData) => {
     }
 
     return { id: newPokemonId };
+
+  
 });
+
+
+
+exports.getUserPokemons = (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'userId es requerido' });
+  }
+
+  const sql = `SELECT * FROM pokemon WHERE id_usuario = ?`;
+
+  try {
+    // 1. Ejecuta la consulta
+    const pokemones = db.prepare(sql).all(userId);
+
+    // 2. Depura por consola lo que devuelve SQLite
+    console.log(`getUserPokemons para userId=${userId}:`, pokemones);
+
+    // 3. Envía la respuesta
+    res.json(pokemones);
+  } catch (err) {
+    console.error('Error en getUserPokemons:', err);
+    res.status(500).json({ error: 'Error al obtener pokemones del usuario: ' + err.message });
+  }
+};
+
+exports.getUserPokemonsNoEvolution = (req, res) => {
+  const { userId } = req.params;
+  if (!userId) return res.status(400).json({ error: 'userId es requerido' });
+
+  try {
+    const sql = `
+      SELECT * FROM pokemon
+      WHERE id_usuario = ?
+        AND id_pokemon_involucion IS NULL
+    `;
+    const pokes = db.prepare(sql).all(userId);
+    return res.json(pokes);
+  } catch (err) {
+    console.error('Error en getUserPokemonsNoEvolution:', err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getUserPokemonsNoInvolution = (req, res) => {
+  const { userId } = req.params;
+  if (!userId) return res.status(400).json({ error: 'userId es requerido' });
+
+  try {
+    const sql = `
+      SELECT * FROM pokemon
+      WHERE id_usuario = ?
+        AND id_pokemon_evolucion IS NULL
+    `;
+    const pokes = db.prepare(sql).all(userId);
+    return res.json(pokes);
+  } catch (err) {
+    console.error('Error en getUserPokemonsNoInvolution:', err);
+    return res.status(500).json({ error: err.message });
+  }
+};
 
 exports.getPokemons = (req, res) => {
     const { userId } = req.query;

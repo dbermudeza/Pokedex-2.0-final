@@ -4,6 +4,7 @@ const multer = require('multer'); // Para subir archivos
 const path = require('path');     // Para manejar rutas de archivos
 const authController = require('./controllers/authController'); // Importas el controlador
 const pokemonController = require('./controllers/pokemonController'); // Importas el controlador
+const db = require('./models/db');
 
 const app = express();
 
@@ -27,6 +28,15 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 app.get('/api/pokemones', pokemonController.getPokemons);
+app.get('/api/usuarios/:userId/pokemones', pokemonController.getUserPokemons);
+app.get(
+  '/api/usuarios/:userId/pokemones/no-evolution',
+  pokemonController.getUserPokemonsNoEvolution
+);
+app.get(
+  '/api/usuarios/:userId/pokemones/no-involution',
+  pokemonController.getUserPokemonsNoInvolution
+);
 app.post('/api/pokemon', upload.fields([
     { name: 'pokemonImage', maxCount: 1 },
     { name: 'locationImage', maxCount: 1 }

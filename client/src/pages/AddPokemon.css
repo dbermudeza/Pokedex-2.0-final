@@ -1,0 +1,46 @@
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  justify-content: center;
+  height: 50%;
+}
+
+.evo-list {
+    margin-top: 10px;
+}
+
+.modal-content button {
+  justify-content: space-between;
+  align-items: center;
+  background: none;
+  border-radius: 8px;
+  color: white;
+  font-family: 'Pixelify Sans', sans-serif;
+  border: none;
+  width: 100%;
+}
+
+
+
+.pokemon-card.selected {
+    background-color: #eb5656;
+}
+
