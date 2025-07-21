@@ -22,37 +22,17 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/general" element={
-        <ProtectedRoute>
-          <GeneralView />
-        </ProtectedRoute>
-      } />
-      <Route path="/clasica" element={
-        <ProtectedRoute>
-          <ClassicView />
-        </ProtectedRoute>
-      } />
+      <Route path="/general" element={<GeneralView />} />  {/* <- YA NO PROTEGIDA */}
+      <Route path="/clasica" element={<ClassicView />} /> {}
       <Route path="/addPokemon" element={
         <ProtectedRoute>
           <AddPokemon />
         </ProtectedRoute>
       } />
-      <Route path="/clasica/detalles/:id" element={
-        <ProtectedRoute>
-          <PokemonDetail />
-        </ProtectedRoute>
-      } />
-      <Route path="/general/detalles/:id" element={
-        <ProtectedRoute>
-          <GeneralDetail />
-        </ProtectedRoute>
-      } />
-      <Route path="/" element={
-        isLoggedIn ? <Navigate to="/clasica" replace /> : <Navigate to="/login" replace />
-      } />
-      <Route path="*" element={
-        isLoggedIn ? <Navigate to="/clasica" replace /> : <Navigate to="/login" replace />
-      } />
+      <Route path="/clasica/detalles/:id" element={<PokemonDetail />} /> {}
+      <Route path="/general/detalles/:id" element={<GeneralDetail/>} />
+      <Route path="/" element={<Navigate to="/general" replace />} />
+      <Route path="*" element={<Navigate to="/general" replace />} />
     </Routes>
   );
 }

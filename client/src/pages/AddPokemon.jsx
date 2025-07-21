@@ -125,26 +125,35 @@ const { isLoggedIn } = useAuth();
   }, []);
 
   useEffect(() => {
-    
-  if (showEvolutionModal && idUsuario) {
-    fetch(`http://localhost:5000/api/usuarios/${idUsuario}/pokemones/no-evolution`)      .then(res => res.json())
-      .then(data => {
-        setPokemonesUsuario(data);
-      })
-      .catch(err => console.error("Error al cargar Pokémon:", err));
-  }
-}, [showEvolutionModal, idUsuario]);
+    if (showEvolutionModal && idUsuario) {
+      fetch(`http://localhost:5000/api/usuarios/${idUsuario}/pokemones/no-evolution`)
+        .then(res => res.json())
+        .then(data => {
+          // Si hay una involución seleccionada, la filtramos
+          const dataFiltrada = involutionSeleccionada
+            ? data.filter(p => p.id !== involutionSeleccionada.id)
+            : data;
+          setPokemonesUsuario(dataFiltrada);
+        })
+        .catch(err => console.error("Error al cargar Pokémon:", err));
+    }
+  }, [showEvolutionModal, idUsuario, involutionSeleccionada]);
 
-useEffect(() => {
-    
-  if (showInvolutionModal && idUsuario) {
-    fetch(`http://localhost:5000/api/usuarios/${idUsuario}/pokemones/no-involution`)      .then(res => res.json())
-      .then(data => {
-        setPokemonesUsuario(data);
-      })
-      .catch(err => console.error("Error al cargar Pokémon:", err));
-  }
-}, [showInvolutionModal, idUsuario]);
+  useEffect(() => {
+    if (showInvolutionModal && idUsuario) {
+      fetch(`http://localhost:5000/api/usuarios/${idUsuario}/pokemones/no-involution`)
+        .then(res => res.json())
+        .then(data => {
+          // Si hay una evolución seleccionada, la filtramos
+          const dataFiltrada = evolutionSeleccionada
+            ? data.filter(p => p.id !== evolutionSeleccionada.id)
+            : data;
+          setPokemonesUsuario(dataFiltrada);
+        })
+        .catch(err => console.error("Error al cargar Pokémon:", err));
+    }
+  }, [showInvolutionModal, idUsuario, evolutionSeleccionada]);
+
 
 
 
@@ -216,80 +225,105 @@ useEffect(() => {
   return (
     
     <>
-      {showEvolutionModal && (
-  <div className="modal-overlay" onClick={() => setShowEvolutionModal(false)}>
-    <div className="modal-content" onClick={e => e.stopPropagation()}>
-      <h2>Elegir evolución</h2>
-      <div className="evo-list">
-        {pokemonesUsuario.length === 0
-          ? <p>No tienes Pokémon disponibles.</p>
-          : pokemonesUsuario.map(p => (
+  {showEvolutionModal && (
+    <div className="modal-overlay" onClick={() => setShowEvolutionModal(false)}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <h2>Elegir evolución</h2>
+        <div className="evo-list">
+          {pokemonesUsuario.length === 0 ? (
+            <p>No tienes Pokémon disponibles.</p>
+          ) : (
+            <>
               <button
-                key={p.id}
-                className="evo-card-btn"
+                className="evo-card-btn cancel-option"
                 onClick={() => {
-                  console.log("Evolución seleccionada:", p);
-                  setEvolutionSeleccionada({ 
-                    id: p.id, 
-                    imagen: `http://localhost:5000/${p.ruta_imagen.replace(/\\/g, '/')}`
-                  });
-                  setHighlightedId(p.id);
+                  setEvolutionSeleccionada(null);
+                  setHighlightedId(null);
                   setShowEvolutionModal(false);
                 }}
               >
-                <PokemonCardClassic 
-                  pokemon={p} 
-                  className={p.id === highlightedId ? 'selected' : ''} // ← pasas la clase
-                />
-                
+                ❌ Ninguna evolución
               </button>
-            ))
-        }
+              {pokemonesUsuario.map(p => (
+                <button
+                  key={p.id}
+                  className="evo-card-btn"
+                  onClick={() => {
+                    console.log("Evolución seleccionada:", p);
+                    setEvolutionSeleccionada({ 
+                      id: p.id, 
+                      imagen: `http://localhost:5000/${p.ruta_imagen.replace(/\\/g, '/')}`
+                    });
+                    setHighlightedId(p.id);
+                    setShowEvolutionModal(false);
+                  }}
+                >
+                  <PokemonCardClassic 
+                    pokemon={p} 
+                    className={p.id === highlightedId ? 'selected' : ''}
+                  />
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+        <button className="close-btn" onClick={() => setShowEvolutionModal(false)}>
+          Cerrar
+        </button>
       </div>
-      <button className="close-btn" onClick={() => setShowEvolutionModal(false)}>
-        Cerrar
-      </button>
     </div>
-  </div>
-)}
+  )}
 
-{/* Modal Involución */}
-{showInvolutionModal && (
-  <div className="modal-overlay" onClick={() => setShowInvolutionModal(false)}>
-    <div className="modal-content" onClick={e => e.stopPropagation()}>
-      <h2>Elegir Pre-evolución</h2>
-      <div className="evo-list">
-        {pokemonesUsuario.length === 0
-          ? <p>No tienes Pokémon disponibles.</p>
-          : pokemonesUsuario.map(p => (
+  {showInvolutionModal && (
+    <div className="modal-overlay" onClick={() => setShowInvolutionModal(false)}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <h2>Elegir Pre-evolución</h2>
+        <div className="evo-list">
+          {pokemonesUsuario.length === 0 ? (
+            <p>No tienes Pokémon disponibles.</p>
+          ) : (
+            <>
               <button
-                key={p.id}
-                className="evo-card-btn"
+                className="evo-card-btn cancel-option"
                 onClick={() => {
-                  console.log("Evolución seleccionada:", p);
-                  setInvolutionSeleccionada({ 
-                    id: p.id, 
-                    imagen: `http://localhost:5000/${p.ruta_imagen.replace(/\\/g, '/')}`
-                  });
-                  setHighlightedId(p.id);
+                  setInvolutionSeleccionada(null);
+                  setHighlightedId(null);
                   setShowInvolutionModal(false);
                 }}
-
               >
-                <PokemonCardClassic 
-                  pokemon={p} 
-                  className={p.id === highlightedId ? 'selected' : ''} // ← pasas la clase
-                />
+                ❌ Ninguna pre-evolución
               </button>
-            ))
-        }
+              {pokemonesUsuario.map(p => (
+                <button
+                  key={p.id}
+                  className="evo-card-btn"
+                  onClick={() => {
+                    console.log("Pre-evolución seleccionada:", p);
+                    setInvolutionSeleccionada({ 
+                      id: p.id, 
+                      imagen: `http://localhost:5000/${p.ruta_imagen.replace(/\\/g, '/')}`
+                    });
+                    setHighlightedId(p.id);
+                    setShowInvolutionModal(false);
+                  }}
+                >
+                  <PokemonCardClassic 
+                    pokemon={p} 
+                    className={p.id === highlightedId ? 'selected' : ''}
+                  />
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+        <button className="close-btn" onClick={() => setShowInvolutionModal(false)}>
+          Cerrar
+        </button>
       </div>
-      <button className="close-btn" onClick={() => setShowInvolutionModal(false)}>
-        Cerrar
-      </button>
     </div>
-  </div>
-)}
+  )}
+
+
 
       <div className="form-section add-pokemon">
       
@@ -349,10 +383,13 @@ useEffect(() => {
           <div id="form-char">
             <div className="char-input">
               <div className="form-input">
-                <input type="number" 
+                <input
+                  type="number"
                   required
+                  min="0"
                   value={altura}
                   onChange={(e) => setAltura(e.target.value)}
+                  className="no-spinner"
                 />
                 <label>Altura</label>
               </div>
@@ -361,15 +398,19 @@ useEffect(() => {
 
             <div className="char-input">
               <div className="form-input">
-                <input type="number" 
+                <input
+                  type="number"
                   required
+                  min="0"
                   value={peso}
                   onChange={(e) => setPeso(e.target.value)}
+                  className="no-spinner"
                 />
                 <label>Peso</label>
               </div>
               <label>kg</label>
             </div>
+
 
             <div className="form-input select">
               <select
