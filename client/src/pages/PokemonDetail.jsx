@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import pokemons from '../data/pokemons';
-import user from '../data/users';
+import { pokemonService, mapPokemonData } from '../services/pokemonService';
 import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
 import MobileMenu from '../components/MobileMenu';
@@ -15,14 +14,20 @@ const PokemonDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const pokemon = pokemons.find(p => p.id === parseInt(id));
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
+
+  // Estados de datos
+  const [pokemon, setPokemon] = useState(null);
+  const [allPokemons, setAllPokemons] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const query = new URLSearchParams(window.location.search);
   const [page, setPage] = useState(parseInt(query.get('page')) || 1);
 
   // Barras y mobile menu
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isLoggedIn, setIsLoggedIn } = useAuth();
   const [showTypeFilter, setShowTypeFilter] = useState(false);
   const [showSortModal, setShowSortModal] = useState(false);
   const [viewType, setViewType] = useState('clasica');
@@ -33,6 +38,62 @@ const PokemonDetail = () => {
   const sortType = params.get("sort") || "id-asc";
   const searchValue = params.get("search") || "";
   const [selectedTypes, setSelectedTypes] = useState(typesFromQuery);
+
+  // Cargar datos al montar el componente o cambiar el ID
+  useEffect(() => {
+    const loadPokemonData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Obtener usuario actual
+        const storedUser = localStorage.getItem('user');
+        if (isLoggedIn && storedUser) {
+          setCurrentUser(JSON.parse(storedUser));
+        } else {
+          setCurrentUser(null);
+        }
+
+        // Obtener datos del pokémon específico y todos los pokémon
+        const userId = isLoggedIn && storedUser ? JSON.parse(storedUser).id : null;
+        
+        console.log(`Cargando Pokémon ID: ${id}, Usuario: ${userId}`);
+        
+        // Forzar recarga de datos para evitar problemas de caché
+        const timestamp = Date.now();
+        const [pokemonData, allPokemonsData] = await Promise.all([
+          pokemonService.getPokemonById(id, userId),
+          pokemonService.getAllPokemons(userId)
+        ]);
+
+        console.log('Datos obtenidos:', {
+          pokemonData,
+          totalPokemons: allPokemonsData.length,
+          pokemonIds: allPokemonsData.map(p => p.id).sort((a, b) => a - b)
+        });
+
+        if (pokemonData) {
+          setPokemon(mapPokemonData(pokemonData));
+          setAllPokemons(allPokemonsData.map(mapPokemonData));
+        } else {
+          console.error(`Pokémon con ID ${id} no encontrado en ${allPokemonsData.length} pokémons disponibles`);
+          setError('Pokémon no encontrado');
+        }
+      } catch (err) {
+        console.error('Error al cargar datos del pokémon:', err);
+        setError('Error al cargar los datos del pokémon');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPokemonData();
+  }, [id, isLoggedIn]); // Dependencias importantes: id e isLoggedIn
+
+  // Actualizar selectedTypes cuando cambie la URL
+  useEffect(() => {
+    setSelectedTypes(typesFromQuery);
+  }, [location.search]);
 
   const handleApplyFilter = () => {
     setShowTypeFilter(false);
@@ -63,25 +124,78 @@ const PokemonDetail = () => {
     navigate(`/clasica${query}`);
   };
 
-  const handleLogin = () => setIsLoggedIn(true);
-  const handleLogout = () => setIsLoggedIn(false);
-
-  const handleBack = () => {
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
     navigate('/clasica');
   };
+
+  const handleFavoritesClick = () => {
+    navigate('/clasica?favorites=true');
+  };
+
+  const handleBack = () => {
+    // Preservar parámetros de búsqueda y filtros si existen
+    const params = new URLSearchParams(location.search);
+    const searchParams = new URLSearchParams();
+    
+    // Mantener parámetros relevantes de la vista anterior
+    if (params.get('types')) searchParams.set('types', params.get('types'));
+    if (params.get('sort')) searchParams.set('sort', params.get('sort'));
+    if (params.get('search')) searchParams.set('search', params.get('search'));
+    if (params.get('favorites')) searchParams.set('favorites', params.get('favorites'));
+    
+    const queryString = searchParams.toString();
+    const destination = queryString ? `/clasica?${queryString}` : '/clasica';
+    
+    navigate(destination);
+  };
+  
   const handlePrev = () => {
-    if (pokemon.id > 1) {
-      navigate(`/clasica/detalles/${pokemon.id - 1}?page=${page}`);
+    if (pokemon && allPokemons.length > 0) {
+      // Ordenar los Pokémon por ID y encontrar el anterior
+      const sortedPokemons = [...allPokemons].sort((a, b) => a.id - b.id);
+      const currentIndex = sortedPokemons.findIndex(p => p.id === pokemon.id);
+      
+      if (currentIndex > 0) {
+        const prevPokemon = sortedPokemons[currentIndex - 1];
+        navigate(`/clasica/detalles/${prevPokemon.id}?page=${page}`);
+      }
     }
   };
+  
   const handleNext = () => {
-    if (pokemon.id < pokemons.length) {
-      navigate(`/clasica/detalles/${pokemon.id + 1}?page=${page}`);
+    if (pokemon && allPokemons.length > 0) {
+      // Ordenar los Pokémon por ID y encontrar el siguiente
+      const sortedPokemons = [...allPokemons].sort((a, b) => a.id - b.id);
+      const currentIndex = sortedPokemons.findIndex(p => p.id === pokemon.id);
+      
+      if (currentIndex < sortedPokemons.length - 1) {
+        const nextPokemon = sortedPokemons[currentIndex + 1];
+        navigate(`/clasica/detalles/${nextPokemon.id}?page=${page}`);
+      }
     }
   };
 
-  if (!pokemon) {
-    return <div className="detail-container">Pokémon no encontrado.</div>;
+  // Manejar estados de carga y error
+  if (loading) {
+    return (
+      <div className="detail-container">
+        <div className="loading">Cargando pokémon...</div>
+      </div>
+    );
+  }
+
+  if (error || !pokemon) {
+    return (
+      <div className="detail-container">
+        <div className="error">
+          {error || 'Pokémon no encontrado.'}
+          <button onClick={() => navigate('/clasica')}>Volver al listado</button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -89,11 +203,11 @@ const PokemonDetail = () => {
       <Header
         onMenuClick={() => setMobileMenuOpen(true)}
         isLoggedIn={isLoggedIn}
-        onLoginClick={handleLogin}
         onLogoutClick={handleLogout}
-        username={user.username}
-        pokedexCount={user.pokemons.length}
+        username={currentUser?.nombre}
+        pokedexCount={currentUser ? allPokemons.filter(p => p.userId === currentUser.id).length : 0}
         onFilter={() => setShowTypeFilter(true)}
+        onFavoritesClick={handleFavoritesClick}
       />
       <SearchBar
         onFilter={() => setShowTypeFilter(true)}
@@ -104,13 +218,13 @@ const PokemonDetail = () => {
       {mobileMenuOpen && (
         <MobileMenu
           isLoggedIn={isLoggedIn}
-          userName={user.username}
-          pokedexCount={user.pokemons.length}
-          onLogin={handleLogin}
+          userName={currentUser?.nombre}
+          pokedexCount={currentUser ? allPokemons.filter(p => p.userId === currentUser.id).length : 0}
           onLogout={handleLogout}
           onSearch={handleSearch}
           onFilter={() => setShowTypeFilter(true)}
           onSort={() => setShowSortModal(true)}
+          onFavoritesClick={handleFavoritesClick}
           onClose={() => setMobileMenuOpen(false)}
         />
       )}
@@ -156,7 +270,7 @@ const PokemonDetail = () => {
                 {page === 3 && (
                     <div className="detail-habitat">
                         <img
-                            src="/assets/pokemonmap.png"
+                            src={pokemon.habitat || "/assets/pokemonmap.png"}
                             alt="Mapa de hábitat"
                             className={!pokemon.discovered ? 'map-faded' : ''}
                         />
@@ -171,8 +285,18 @@ const PokemonDetail = () => {
               <button onClick={() => setPage(3)} disabled={page === 3}>3</button>
           </div>
           <div className="detail-nav-buttons">
-              <button onClick={handlePrev} disabled={pokemon.id === 1}>← Anterior</button>
-              <button onClick={handleNext} disabled={pokemon.id === pokemons.length}>Siguiente →</button>
+              <button 
+                onClick={handlePrev} 
+                disabled={!pokemon || allPokemons.length === 0 || [...allPokemons].sort((a, b) => a.id - b.id).findIndex(p => p.id === pokemon.id) === 0}
+              >
+                ← Anterior
+              </button>
+              <button 
+                onClick={handleNext} 
+                disabled={!pokemon || allPokemons.length === 0 || [...allPokemons].sort((a, b) => a.id - b.id).findIndex(p => p.id === pokemon.id) === allPokemons.length - 1}
+              >
+                Siguiente →
+              </button>
           </div>
         </div>
       </div>

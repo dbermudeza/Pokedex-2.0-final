@@ -7,23 +7,62 @@ import GeneralView from './pages/GeneralView';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AddPokemon from'./pages/AddPokemon.jsx'
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+
+// Componente para proteger rutas que requieren autenticación
+function ProtectedRoute({ children }) {
+  const { isLoggedIn } = useAuth();
+  return isLoggedIn ? children : <Navigate to="/login" replace />;
+}
+
+function AppRoutes() {
+  const { isLoggedIn } = useAuth();
+  
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/general" element={
+        <ProtectedRoute>
+          <GeneralView />
+        </ProtectedRoute>
+      } />
+      <Route path="/clasica" element={
+        <ProtectedRoute>
+          <ClassicView />
+        </ProtectedRoute>
+      } />
+      <Route path="/addPokemon" element={
+        <ProtectedRoute>
+          <AddPokemon />
+        </ProtectedRoute>
+      } />
+      <Route path="/clasica/detalles/:id" element={
+        <ProtectedRoute>
+          <PokemonDetail />
+        </ProtectedRoute>
+      } />
+      <Route path="/general/detalles/:id" element={
+        <ProtectedRoute>
+          <GeneralDetail />
+        </ProtectedRoute>
+      } />
+      <Route path="/" element={
+        isLoggedIn ? <Navigate to="/clasica" replace /> : <Navigate to="/login" replace />
+      } />
+      <Route path="*" element={
+        isLoggedIn ? <Navigate to="/clasica" replace /> : <Navigate to="/login" replace />
+      } />
+    </Routes>
+  );
+}
 
 function App() {
   return (
     <AuthProvider>
-    <Router>
-      <Routes>
-        <Route path="/general" element={<GeneralView />} />
-        <Route path="/clasica" element={<ClassicView />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/addPokemon" element={<AddPokemon />} />
-        <Route path="/clasica/detalles/:id" element={<PokemonDetail />} />
-        <Route path="/general/detalles/:id" element={<GeneralDetail />} />
-        <Route path="*" element={<Navigate to="/clasica" replace />} />
-      </Routes>
-    </Router>
+      <Router>
+        <AppRoutes />
+      </Router>
     </AuthProvider>
   );
 }

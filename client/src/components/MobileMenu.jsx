@@ -6,8 +6,8 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import filterRombo from '../assets/filter-rombo.png';
 import sortRombo from '../assets/sort-rombo.png';
 import CloseIcon from '@mui/icons-material/Close';
-import { useAuth } from '../context/AuthContext'; // <-- 1. IMPORTA useAuth
-import { useNavigate, useLocation } from 'react-router-dom'; // <-- 2. IMPORTA useNavigate y useLocation
+import { useAuth } from '../context/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const MobileMenu = ({
   // Se quitan isLoggedIn y userName de las props
@@ -22,7 +22,7 @@ const MobileMenu = ({
   const [input, setInput] = useState("");
   const navigate = useNavigate(); // Hook para navegar
   const location = useLocation(); // Hook para obtener la ubicación actual
-  const { isLoggedIn, username } = useAuth(); // <-- 3. USA EL CONTEXTO
+  const { isLoggedIn, username } = useAuth();
 
   const handleInput = (e) => setInput(e.target.value);
 

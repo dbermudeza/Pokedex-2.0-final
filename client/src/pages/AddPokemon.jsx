@@ -154,7 +154,7 @@ useEffect(() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 1. Obtener el ID del usuario desde localStorage
+    // Obtener el ID del usuario desde localStorage
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
         alert('Error: No se pudo identificar al usuario. Por favor, inicie sesión.');
@@ -162,13 +162,13 @@ useEffect(() => {
     }
     const userId = JSON.parse(storedUser).id;
 
-    // 2. Validar que los campos requeridos no estén vacíos
+    // Validar que los campos requeridos no estén vacíos
     if (!nombre || !descripcion || !altura || !peso || !categoria || !habilidad || !genero || !inputRef1.current.files[0] || !inputRef2.current.files[0]) {
         alert('Por favor, completa todos los campos obligatorios, incluyendo las imágenes.');
         return;
     }
 
-    // 3. Crear el FormData y añadir TODOS los datos
+    // Crear el FormData y añadir TODOS los datos
     const formData = new FormData();
     formData.append('nombre', nombre);
     formData.append('descripcion', descripcion);
@@ -187,7 +187,7 @@ useEffect(() => {
     formData.append('pokemonImage', inputRef1.current.files[0]);
     formData.append('locationImage', inputRef2.current.files[0]);
 
-    // 4. Enviar la petición
+    // Enviar la petición
     try {
       const response = await fetch('http://localhost:5000/api/pokemon', { 
         method: 'POST',
@@ -202,7 +202,10 @@ useEffect(() => {
       }
 
       alert('¡Pokémon añadido con éxito!');
-      navigate(-1);
+      
+      // En lugar de usar navigate(-1), usar navigate con replace para forzar actualización
+      // Esto asegura que la vista se recargue completamente
+      navigate('/clasica', { replace: true });
       
     } catch (error) {
       console.error('Error en el fetch:', error);
@@ -254,7 +257,7 @@ useEffect(() => {
 {showInvolutionModal && (
   <div className="modal-overlay" onClick={() => setShowInvolutionModal(false)}>
     <div className="modal-content" onClick={e => e.stopPropagation()}>
-      <h2>Elegir involución</h2>
+      <h2>Elegir Pre-evolución</h2>
       <div className="evo-list">
         {pokemonesUsuario.length === 0
           ? <p>No tienes Pokémon disponibles.</p>

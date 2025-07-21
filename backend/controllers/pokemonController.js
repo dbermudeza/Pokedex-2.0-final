@@ -65,7 +65,7 @@ const insertPokemonTransaction = db.transaction((pokemonData) => {
     `).run(newPokemonId, id_pokemon_evolucion);
   }
 
-  // 3. Insertar las relaciones en la tabla 'pokemon_tipo'
+  // Insertar las relaciones en la tabla 'pokemon_tipo'
     if (tipos && tipos.length > 0) {
         const selectTypeStmt = db.prepare('SELECT id FROM tipo WHERE nombre = ?');
         const insertPokemonTypeStmt = db.prepare('INSERT INTO pokemon_tipo (id_pokemon, id_tipo) VALUES (?, ?)');
@@ -95,13 +95,13 @@ exports.getUserPokemons = (req, res) => {
   const sql = `SELECT * FROM pokemon WHERE id_usuario = ?`;
 
   try {
-    // 1. Ejecuta la consulta
+    // Ejecuta la consulta
     const pokemones = db.prepare(sql).all(userId);
 
-    // 2. Depura por consola lo que devuelve SQLite
+    // Depura por consola lo que devuelve SQLite
     console.log(`getUserPokemons para userId=${userId}:`, pokemones);
 
-    // 3. Envía la respuesta
+    // Envía la respuesta
     res.json(pokemones);
   } catch (err) {
     console.error('Error en getUserPokemons:', err);
@@ -147,6 +147,8 @@ exports.getUserPokemonsNoInvolution = (req, res) => {
 
 exports.getPokemons = (req, res) => {
     const { userId } = req.query;
+    
+    console.log(`getPokemons llamado con userId: ${userId}`);
 
     // Consulta SQL que incluye información de favoritos
     const baseQuery = `
@@ -169,15 +171,21 @@ exports.getPokemons = (req, res) => {
 
     // La lógica para filtrar por usuario sigue siendo la misma
     if (userId) {
-        sql = `${baseQuery} WHERE p.id_usuario IS NULL OR p.id_usuario = ? GROUP BY p.id`;
+        sql = `${baseQuery} WHERE p.id_usuario IS NULL OR p.id_usuario = ? GROUP BY p.id ORDER BY p.id`;
         params.push(userId, userId);
     } else {
-        sql = `${baseQuery} WHERE p.id_usuario IS NULL GROUP BY p.id`;
+        sql = `${baseQuery} WHERE p.id_usuario IS NULL GROUP BY p.id ORDER BY p.id`;
         params.push(null);
     }
 
+    console.log(`SQL Query: ${sql}`);
+    console.log(`Params: ${JSON.stringify(params)}`);
+
     try {
         const pokemones = db.prepare(sql).all(params);
+        console.log(`Pokémons encontrados: ${pokemones.length}`);
+        console.log(`IDs de pokémons: ${pokemones.map(p => p.id).sort((a, b) => a - b)}`);
+        
         const pokemonesConTiposEnArray = pokemones.map(p => {
             return {
                 ...p,
@@ -187,6 +195,7 @@ exports.getPokemons = (req, res) => {
         });
         res.json(pokemonesConTiposEnArray);
     } catch (err) {
+        console.error('❌ Error en getPokemons:', err);
         res.status(500).json({ error: 'Error en el servidor: ' + err.message });
     }
 };

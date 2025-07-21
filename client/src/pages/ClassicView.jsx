@@ -7,6 +7,7 @@ import MobileMenu from '../components/MobileMenu';
 import ViewTypeBar from '../components/ViewTypeBar';
 import TypeFilterModal from '../components/TypeFilterModal';
 import SortModal from '../components/SortModal';
+import { pokemonService, mapPokemonData, getImageUrl, getEvolutionLineForPokemon } from '../services/pokemonService';
 import './ClassicView.css';
 import { useAuth } from '../context/AuthContext';
 
@@ -19,6 +20,8 @@ const ClassicView = () => {
   const [allPokemons, setAllPokemons] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Estados de UI
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -28,30 +31,67 @@ const ClassicView = () => {
 
   // Carga de datos
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (isLoggedIn && storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    } else {
-      setCurrentUser(null);
-    }
-
     const fetchPokemons = async () => {
-      let url = 'http://localhost:5000/api/pokemones';
-      if (isLoggedIn && storedUser) {
-        const user = JSON.parse(storedUser);
-        url += `?userId=${user.id}`;
-      }
       try {
-        const response = await fetch(url);
-        const data = await response.json();
-        setAllPokemons(data);
+        setLoading(true);
+        setError(null);
+
+        // Obtener usuario actual
+        const storedUser = localStorage.getItem('user');
+        if (isLoggedIn && storedUser) {
+          setCurrentUser(JSON.parse(storedUser));
+        } else {
+          setCurrentUser(null);
+        }
+
+        // Obtener pokémons desde la API
+        const userId = isLoggedIn && storedUser ? JSON.parse(storedUser).id : null;
+        console.log('Cargando pokémons en ClassicView para usuario:', userId);
+        
+        const pokemonsData = await pokemonService.getAllPokemons(userId);
+        
+        console.log('Pokémons obtenidos:', pokemonsData.length, 'IDs:', pokemonsData.map(p => p.id).sort((a, b) => a - b));
+        
+        // Mapear los datos al formato esperado por el frontend
+        const mappedPokemons = pokemonsData.map(mapPokemonData);
+        setAllPokemons(mappedPokemons);
       } catch (err) {
-        console.error('Error al obtener pokemones del backend', err);
+        console.error('Error al obtener pokémones del backend:', err);
+        setError('Error al cargar los pokémones');
         setAllPokemons([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchPokemons();
+  }, [isLoggedIn]);
+
+  // Recargar datos cuando el usuario vuelve a la página (foco)
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('Página recobró el foco, recargando datos...');
+      const fetchPokemons = async () => {
+        try {
+          const storedUser = localStorage.getItem('user');
+          const userId = isLoggedIn && storedUser ? JSON.parse(storedUser).id : null;
+          const pokemonsData = await pokemonService.getAllPokemons(userId);
+          const mappedPokemons = pokemonsData.map(mapPokemonData);
+          setAllPokemons(mappedPokemons);
+          console.log('Datos actualizados al volver a la página');
+        } catch (err) {
+          console.error('Error al recargar pokémones:', err);
+        }
+      };
+
+      fetchPokemons();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [isLoggedIn]);
 
   // Lógica de filtros, búsqueda y ordenamiento
@@ -68,8 +108,8 @@ const ClassicView = () => {
 
   const filteredPokemons = allPokemons.filter(p => {
     const matchesType = typesFromQuery.length === 0 || (p.type && p.type.some(type => typesFromQuery.includes(type)));
-    const matchesSearch = !searchValue || (p.nombre && p.nombre.toLowerCase().includes(searchValue.toLowerCase()));
-    const matchesFavorites = !showFavoritesOnly || (p.favorito === 1 || p.favorito === true);
+    const matchesSearch = !searchValue || (p.name && p.name.toLowerCase().includes(searchValue.toLowerCase()));
+    const matchesFavorites = !showFavoritesOnly || p.favorito === true;
     return matchesType && matchesSearch && matchesFavorites;
   });
 
@@ -77,8 +117,8 @@ const ClassicView = () => {
     switch (sortType) {
       case "id-asc": return a.id - b.id;
       case "id-desc": return b.id - a.id;
-      case "name-asc": return (a.nombre || "").localeCompare(b.nombre || "");
-      case "name-desc": return (b.nombre || "").localeCompare(a.nombre || "");
+      case "name-asc": return (a.name || "").localeCompare(b.name || "");
+      case "name-desc": return (b.name || "").localeCompare(a.name || "");
       default: return 0;
     }
   });
@@ -125,19 +165,54 @@ const ClassicView = () => {
     navigate('/clasica?favorites=true');
   };
 
-  // Lógica específica de la vista
+  // Función para refrescar manualmente los datos
+  const handleRefresh = async () => {
+    try {
+      setLoading(true);
+      const storedUser = localStorage.getItem('user');
+      const userId = isLoggedIn && storedUser ? JSON.parse(storedUser).id : null;
+      
+      console.log('Refrescando datos manualmente...');
+      
+      const pokemonsData = await pokemonService.getAllPokemons(userId, true);
+      const mappedPokemons = pokemonsData.map(mapPokemonData);
+      setAllPokemons(mappedPokemons);
+      
+      console.log('Datos refrescados exitosamente');
+    } catch (err) {
+      console.error('Error al refrescar pokémones:', err);
+      setError('Error al refrescar los datos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Lógica específica de la vista - Líneas evolutivas usando datos de BD
   const getEvolutionLine = (id) => {
-    const pokemon = allPokemons.find(p => p.id === id);
-    if (!pokemon) return [];
-    
-    // Esta es una lógica de ejemplo, deberías adaptarla a cómo manejas las evoluciones
-    if ([1, 2, 3].includes(id)) return [1, 2, 3];
-    if ([4, 5, 6].includes(id)) return [4, 5, 6];
-    if ([7, 8, 9].includes(id)) return [7, 8, 9];
-    return [id];
+    return getEvolutionLineForPokemon(id, allPokemons);
   };
 
   const evolutionLine = selectedId ? getEvolutionLine(selectedId) : [];
+
+  // Estados de carga y error
+  if (loading) {
+    return (
+      <div className="classic-container">
+        <div className="loading">Cargando pokémones...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="classic-container">
+        <div className="error">
+          {error}
+          <button onClick={() => window.location.reload()}>Recargar</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="classic-container">
@@ -147,20 +222,21 @@ const ClassicView = () => {
         isLoggedIn={isLoggedIn}
         onFavoritesClick={handleFavoritesClick}
         username={currentUser?.nombre}
-        pokedexCount={currentUser ? allPokemons.filter(p => p.id_usuario === currentUser.id).length : 0}
+        pokedexCount={currentUser ? allPokemons.filter(p => p.userId === currentUser.id).length : 0}
         onFilter={() => setShowTypeFilter(true)}
       />
       <SearchBar
         onFilter={() => setShowTypeFilter(true)}
         onSortClick={() => setShowSortModal(true)}
         onSearch={handleSearch}
+        onRefresh={handleRefresh}
       />
       <ViewTypeBar viewType={viewType} onChange={(type) => navigate(`/${type}`)} />
       {mobileMenuOpen && (
         <MobileMenu
           isLoggedIn={isLoggedIn}
           userName={currentUser?.nombre}
-          pokedexCount={currentUser ? allPokemons.filter(p => p.id_usuario === currentUser.id).length : 0}
+          pokedexCount={currentUser ? allPokemons.filter(p => p.userId === currentUser.id).length : 0}
           onLogout={handleLogout}
           onSearch={handleSearch}
           onFilter={() => setShowTypeFilter(true)}
@@ -174,10 +250,10 @@ const ClassicView = () => {
         {evolutionLine.length > 0 ? (
           evolutionLine.map((evoId) => {
             const evo = allPokemons.find(p => p.id === evoId);
-            const imageUrl = evo ? `http://localhost:5000/${evo.ruta_imagen}` : "/assets/pokeball.png";
+            const imageUrl = evo ? evo.sprite : "/assets/pokeball.png";
             return (
               <div key={evoId} className={`evolution-slot ${evo && evo.id === selectedId ? 'selected' : ''}`}>
-                <img src={imageUrl} alt={evo ? evo.nombre : "Unknown"} />
+                <img src={imageUrl} alt={evo ? evo.name : "Unknown"} />
               </div>
             );
           })

@@ -3,7 +3,7 @@ import './SearchBar.css';
 import filterRombo from '../assets/filter-rombo.png';
 import sortRombo from '../assets/sort-rombo.png';
 
-const SearchBar = ({ onFilter, onSortClick, onSearch }) => {
+const SearchBar = ({ onFilter, onSortClick, onSearch, onRefresh }) => {
   const [input, setInput] = useState("");
 
   const handleInput = (e) => {
