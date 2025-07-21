@@ -162,7 +162,7 @@ const ClassicView = () => {
   };
 
   const handleFavoritesClick = () => {
-    navigate('/clasica?favorites=true');
+  navigate(`/clasica${buildQueryString({ favorites: !showFavoritesOnly ? 'true' : undefined })}`);
   };
 
   // Función para refrescar manualmente los datos
