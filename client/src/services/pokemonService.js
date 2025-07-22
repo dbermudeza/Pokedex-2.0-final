@@ -188,6 +188,13 @@ export const getImageUrl = (imagePath) => {
   return `http://localhost:5000/${imagePath.replace(/\\/g, '/')}`;
 };
 
+// Utilidad específica para formatear la URL de la imagen del hábitat
+export const getHabitatImageUrl = (imagePath) => {
+  if (!imagePath) return '/assets/pokemonmap.png';
+  if (imagePath.startsWith('http')) return imagePath;
+  return `http://localhost:5000/${imagePath.replace(/\\/g, '/')}`;
+};
+
 // Utilidad para mapear tipos de la base de datos a los que espera el frontend
 export const mapPokemonData = (pokemonFromDB) => {
   return {
@@ -205,7 +212,7 @@ export const mapPokemonData = (pokemonFromDB) => {
     discovered: true,
     favorito: pokemonFromDB.favorito || false,
     evolution: [], // Por ahora vacío, se puede implementar después
-    habitat: getImageUrl(pokemonFromDB.ruta_ubicacion),
+    habitat: getHabitatImageUrl(pokemonFromDB.ruta_ubicacion),
     // Datos adicionales de la BD - IMPORTANTE: incluir datos de evolución
     userId: pokemonFromDB.id_usuario,
     id_pokemon_evolucion: pokemonFromDB.id_pokemon_evolucion,

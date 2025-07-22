@@ -8,6 +8,7 @@ import typeColors from '../utils/typeColors';
 import TypeFilterModal from '../components/TypeFilterModal';
 import SortModal from "../components/SortModal";
 import { useAuth } from '../context/AuthContext';
+import { getEvolutionLineForPokemon } from '../services/pokemonService';
 
 import './GeneralDetail.css';
 
@@ -148,27 +149,34 @@ const GeneralDetail = () => {
   const handleFavoritesToggle = () => {
     navigate('/general?favorites=true');
   };
-  // Lógica de línea evolutiva
-  const getEvolutionLine = (id) => {  
-    if ([1, 2, 3].includes(id)) return [1, 2, 3];
-    if ([4, 5, 6].includes(id)) return [4, 5, 6];
-    if ([7, 8, 9].includes(id)) return [7, 8, 9];
-    if ([10, 11, 12].includes(id)) return [10, 11, 12];
-    if ([13, 14].includes(id)) return [13, 14];
-    return [id];
-  };
-  const evolutionLine = pokemon ? getEvolutionLine(pokemon.id) : [];
+
+  // Obtener línea evolutiva usando la función del servicio
+  const evolutionLine = pokemon ? getEvolutionLineForPokemon(pokemon.id, allPokemons) : [];
 
   // Navegación entre pokémon
   const handlePrev = () => {
-    if (pokemon && pokemon.id > 1) {
-      navigate(`/general/detalles/${pokemon.id - 1}`);
+    if (pokemon && allPokemons.length > 0) {
+      // Ordenar los Pokémon por ID y encontrar el anterior
+      const sortedPokemons = [...allPokemons].sort((a, b) => a.id - b.id);
+      const currentIndex = sortedPokemons.findIndex(p => p.id === pokemon.id);
+      
+      if (currentIndex > 0) {
+        const prevPokemon = sortedPokemons[currentIndex - 1];
+        navigate(`/general/detalles/${prevPokemon.id}`);
+      }
     }
   };
 
   const handleNext = () => {
-    if (pokemon && allPokemons.length > 0 && pokemon.id < allPokemons.length) {
-      navigate(`/general/detalles/${pokemon.id + 1}`);
+    if (pokemon && allPokemons.length > 0) {
+      // Ordenar los Pokémon por ID y encontrar el siguiente
+      const sortedPokemons = [...allPokemons].sort((a, b) => a.id - b.id);
+      const currentIndex = sortedPokemons.findIndex(p => p.id === pokemon.id);
+      
+      if (currentIndex < sortedPokemons.length - 1) {
+        const nextPokemon = sortedPokemons[currentIndex + 1];
+        navigate(`/general/detalles/${nextPokemon.id}`);
+      }
     }
   };
 
@@ -254,9 +262,9 @@ const GeneralDetail = () => {
             <button
               className="nav-arrow"
               onClick={handlePrev}
-              disabled={!pokemon || pokemon.id === 1}
+              disabled={!pokemon || !allPokemons.length || [...allPokemons].sort((a, b) => a.id - b.id).findIndex(p => p.id === pokemon.id) === 0}
               aria-label="Anterior"
-              style={{ background: 'none', border: 'none', boxShadow: 'none', cursor: (!pokemon || pokemon.id === 1) ? 'not-allowed' : 'pointer' }}
+              style={{ background: 'none', border: 'none', boxShadow: 'none', cursor: (!pokemon || !allPokemons.length || [...allPokemons].sort((a, b) => a.id - b.id).findIndex(p => p.id === pokemon.id) === 0) ? 'not-allowed' : 'pointer' }}
             >
               <span className="material-symbols-outlined" style={{ color: '#0D84EF', fontSize: '2.5rem' }}>
                 line_start_arrow_notch
@@ -271,9 +279,9 @@ const GeneralDetail = () => {
             <button
               className="nav-arrow"
               onClick={handleNext}
-              disabled={!pokemon || !allPokemons.length || pokemon.id >= allPokemons.length}
+              disabled={!pokemon || !allPokemons.length || [...allPokemons].sort((a, b) => a.id - b.id).findIndex(p => p.id === pokemon.id) === allPokemons.length - 1}
               aria-label="Siguiente"
-              style={{ background: 'none', border: 'none', boxShadow: 'none', cursor: (!pokemon || !allPokemons.length || pokemon.id >= allPokemons.length) ? 'not-allowed' : 'pointer' }}
+              style={{ background: 'none', border: 'none', boxShadow: 'none', cursor: (!pokemon || !allPokemons.length || [...allPokemons].sort((a, b) => a.id - b.id).findIndex(p => p.id === pokemon.id) === allPokemons.length - 1) ? 'not-allowed' : 'pointer' }}
             >
               <span className="material-symbols-outlined" style={{ color: '#0D84EF', fontSize: '2.5rem' }}>
                 line_end_arrow_notch
@@ -409,9 +417,9 @@ const GeneralDetail = () => {
             <button
               className="nav-arrow"
               onClick={handlePrev}
-              disabled={!pokemon || pokemon.id === 1}
+              disabled={!pokemon || !allPokemons.length || [...allPokemons].sort((a, b) => a.id - b.id).findIndex(p => p.id === pokemon.id) === 0}
               aria-label="Anterior"
-              style={{ background: 'none', border: 'none', boxShadow: 'none', cursor: (!pokemon || pokemon.id === 1) ? 'not-allowed' : 'pointer' }}
+              style={{ background: 'none', border: 'none', boxShadow: 'none', cursor: (!pokemon || !allPokemons.length || [...allPokemons].sort((a, b) => a.id - b.id).findIndex(p => p.id === pokemon.id) === 0) ? 'not-allowed' : 'pointer' }}
             >
               <span className="material-symbols-outlined" style={{ color: '#0D84EF', fontSize: '2.5rem' }}>
                 line_start_arrow_notch
@@ -426,9 +434,9 @@ const GeneralDetail = () => {
             <button
               className="nav-arrow"
               onClick={handleNext}
-              disabled={!pokemon || !allPokemons.length || pokemon.id >= allPokemons.length}
+              disabled={!pokemon || !allPokemons.length || [...allPokemons].sort((a, b) => a.id - b.id).findIndex(p => p.id === pokemon.id) === allPokemons.length - 1}
               aria-label="Siguiente"
-              style={{ background: 'none', border: 'none', boxShadow: 'none', cursor: (!pokemon || !allPokemons.length || pokemon.id >= allPokemons.length) ? 'not-allowed' : 'pointer' }}
+              style={{ background: 'none', border: 'none', boxShadow: 'none', cursor: (!pokemon || !allPokemons.length || [...allPokemons].sort((a, b) => a.id - b.id).findIndex(p => p.id === pokemon.id) === allPokemons.length - 1) ? 'not-allowed' : 'pointer' }}
             >
               <span className="material-symbols-outlined" style={{ color: '#0D84EF', fontSize: '2.5rem' }}>
                 line_end_arrow_notch

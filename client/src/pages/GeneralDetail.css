@@ -151,6 +151,10 @@ body {
   background: #EE2C23;
   color: white;
   padding: 1rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-line; 
+  max-width: 100%;
 }
 
 .general-evolution-section {
