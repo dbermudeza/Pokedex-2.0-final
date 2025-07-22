@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { pokemonService, mapPokemonData } from '../services/pokemonService';
+import { pokemonService, mapPokemonData, getHabitatImageUrl } from '../services/pokemonService';
 import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
 import MobileMenu from '../components/MobileMenu';
@@ -18,6 +18,7 @@ const PokemonDetail = () => {
 
   // Estados de datos
   const [pokemon, setPokemon] = useState(null);
+  const [pokemonRaw, setPokemonRaw] = useState(null); // Datos originales sin mapear
   const [allPokemons, setAllPokemons] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -73,6 +74,7 @@ const PokemonDetail = () => {
         });
 
         if (pokemonData) {
+          setPokemonRaw(pokemonData); // Guardar datos originales
           setPokemon(mapPokemonData(pokemonData));
           setAllPokemons(allPokemonsData.map(mapPokemonData));
         } else {
@@ -270,9 +272,12 @@ const PokemonDetail = () => {
                 {page === 3 && (
                     <div className="detail-habitat">
                         <img
-                            src={pokemon.habitat || "/assets/pokemonmap.png"}
+                            src={getHabitatImageUrl(pokemonRaw?.ruta_ubicacion)}
                             alt="Mapa de hábitat"
                             className={!pokemon.discovered ? 'map-faded' : ''}
+                            onError={(e) => {
+                              e.target.src = "/assets/pokemonmap.png";
+                            }}
                         />
                         <div className="habitat-label">Hábitat</div>
                     </div>

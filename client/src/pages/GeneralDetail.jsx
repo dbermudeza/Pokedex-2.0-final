@@ -8,7 +8,7 @@ import typeColors from '../utils/typeColors';
 import TypeFilterModal from '../components/TypeFilterModal';
 import SortModal from "../components/SortModal";
 import { useAuth } from '../context/AuthContext';
-import { getEvolutionLineForPokemon } from '../services/pokemonService';
+import { getEvolutionLineForPokemon, getImageUrl, getHabitatImageUrl } from '../services/pokemonService';
 
 import './GeneralDetail.css';
 
@@ -257,7 +257,7 @@ const GeneralDetail = () => {
           />
         )}
       <div className="general-detail-container">
-        <div>
+        <div className="general-detail-content-inner">
           <div className="detail-nav-bar">
             <button
               className="nav-arrow"
@@ -290,7 +290,7 @@ const GeneralDetail = () => {
           </div>
           <div className="general-detail-container">
             <div className="general-detail-left">
-              <img className="general-pokemon-img" src={pokemon?.ruta_imagen ? `http://localhost:5000/${pokemon.ruta_imagen}` : "/assets/pokeball.png"} alt={pokemon?.nombre || "Pokemon"} />
+              <img className="general-pokemon-img" src={getImageUrl(pokemon?.ruta_imagen)} alt={pokemon?.nombre || "Pokemon"} />
               <div className="general-gender-icons">
                 {pokemon.genero ? (
                   <span
@@ -381,7 +381,7 @@ const GeneralDetail = () => {
                     {evo && evo.ruta_imagen ? (
                       <>
                         <img
-                          src={`http://localhost:5000/${evo.ruta_imagen}`}
+                          src={getImageUrl(evo.ruta_imagen)}
                           alt={evo.nombre}
                           style={{ width: 60, height: 60, objectFit: "contain", display: "block", margin: "0 auto" }}
                         />
@@ -400,11 +400,7 @@ const GeneralDetail = () => {
             <h3>HABITAT</h3>
             <div className="general-habitat-map">
               <img 
-                src={
-                  pokemon?.ruta_ubicacion && pokemon.ruta_ubicacion.startsWith('uploads/') 
-                    ? `http://localhost:5000/${pokemon.ruta_ubicacion}` 
-                    : "/assets/pokemonmap.png"
-                } 
+                src={getHabitatImageUrl(pokemon?.ruta_ubicacion)}
                 alt="Hábitat"
                 onError={(e) => {
                   e.target.src = "/assets/pokemonmap.png";

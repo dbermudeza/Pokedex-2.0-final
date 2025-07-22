@@ -146,6 +146,11 @@ body {
   text-align: center;
 }
 
+.general-detail-content-inner {
+  display: flex 1;
+  width: 100%;
+}
+
 .general-description-box {
   margin-top: 0.5rem;
   background: #EE2C23;
